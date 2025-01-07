@@ -16,7 +16,7 @@ def run_pipeline(custom_args, beam_args):
     entrada=custom_args.entrada
     salida=custom_args.salida
     opts=PipelineOptions(beam_args)
-    with beam.Pipeline(opts) as p:
+    with beam.Pipeline(options=opts) as p:
         #Se va a leer todo el archivo a procesar
         lineas: PCollection[str]= p | beam.io.ReadFromText(entrada)
         #"En un lugar de la mancha"->["En", "un",..]-> "En", "un"...
@@ -24,7 +24,7 @@ def run_pipeline(custom_args, beam_args):
         palabras=lineas | beam.FlatMap(lambda l: l.split())
         #Esta función nos va a regresar una tupla con el contador y la palabra
         contadas: PCollection[Tuple[str, int]]= palabras | beam.combiners.Count.PerElement()
-        palabras_top=contadas | beam.combiners.Top.Of(5, keys=lambda kv:kv[1])
+        palabras_top=contadas | beam.combiners.Top.Of(5, key=lambda kv:kv[1])
         palabras_top | beam.Map(print)
 
 if __name__=='__main__':
